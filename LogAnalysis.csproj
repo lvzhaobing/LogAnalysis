@@ -6,4 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AME.SortedDirectoryChs" Version="7.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\analyze_hogs\analysis_hogs_log.py" />
+    <None Include="wwwroot\analyze_hogs\templates\template.html" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>TDC-O1 系统测试报告</title>
+    <!-- 引入 echarts.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.1/echarts.min.js" integrity="sha512-OTbGFYPLe3jhy4bUwbB8nls0TFgz10kn0TLkmyA+l3FyivDs31zsXCjOis7YGDtE2Jsy0+fzW+3/OVoPVujPmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<h1>TDC-O1 系统测试报告</h1>
+<body>
+    <h2>内存占用饼图</h2>
+    <div id="process_memory_pie_charts_data" style="width: 1200px;height:800px;"></div>
+    <h2>内存占用曲线</h2>
+    <div id="process_memory_charts_data" style="width: 1200px;height:800px;"></div>
+    <table border="1" width="40%" cellspacing='0' cellpadding='0'>
+        <tr>
+            <th>Process Name</th>
+            <th>MEM Usage(MB)</th>
+        </tr>
+
+        {% for item in charts_data_map.process_memory_pie_charts_data.series.data %}
+        <tr align='center'>
+            <td>{{ item.name }}</td>
+            <td>{{ item.value }}</td>
+        </tr>
+        {% endfor%}
+    </table>
+    <h2>CPU占用饼图</h2>
+    <div id="process_cpu_pie_charts_data" style="width: 1200px;height:800px;"></div>
+    <h2>CPU占用曲线</h2>
+    <div id="process_cpu_charts_data" style="width: 1200px;height:800px;"></div>
+
+    <table border="1" width="40%" cellspacing='0' cellpadding='0'>
+        <tr>
+            <th>Process Name</th>
+            <th>CPU Usage(%)</th>
+        </tr>
+
+        {% for item in charts_data_map.process_cpu_pie_charts_data.series.data %}
+        <tr align='center'>
+            <td>{{ item.name }}</td>
+            <td>{{ item.value }}</td>
+        </tr>
+        {% endfor%}
+    </table>
+
+    <script type="text/javascript">
+        window.onload = function(){
+
+        // 基于准备好的dom，初始化echarts实例
+        var charts_data_map = {{charts_data_map}};
+        var divs = document.body.getElementsByTagName('div');
+        var div_keys = []
+        for(var i=0;i<divs.length;i++){
+            let charts_key = divs[i].id;
+            div_keys.push(charts_key);
+        }
+
+        for(var i=0;i<div_keys.length;i++)
+        {
+            var charts_key = div_keys[i];
+            var myChart = echarts.init(document.getElementById(charts_key));
+            var charts_data = charts_data_map[charts_key];
+
+            // 指定图表的配置项和数据
+            var option = {
+                toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+                },
+                title: {
+                    text: charts_data.title
+                },
+                tooltip: {},
+                // legend: {
+                //     data:charts_data.legend
+                // },
+                xAxis: {},
+                yAxis: {},
+                series: charts_data.series,
+                dataZoom: [{
+                    show: true,
+                    type: 'slider',
+                    xAxisIndex: [0, 1],
+                    bottom: 10,
+                    start: 10,
+                    end: 100
+                },
+                {
+                    start: 0,
+                    end: 40,
+                    type: "inside",  // 支持内部鼠标滚动平移
+                    zoomOnMouseWheel: false,  // 关闭滚轮缩放
+                    moveOnMouseWheel: true, // 开启滚轮平移
+                    moveOnMouseMove: true  // 鼠标移动能触发数据窗口平移
+                }
+            ],
+            };
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        }
+    }
+    </script>
+</body>
+</html>

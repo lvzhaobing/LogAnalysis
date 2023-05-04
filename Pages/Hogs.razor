@@ -1,0 +1,126 @@
+﻿@page "/"
+@using System.Diagnostics;
+
+<PageTitle>Hogs分析工具</PageTitle>
+
+<h1>Hogs分析工具</h1>
+
+<div>
+    上传hogs log文件 要求后缀名以 .log结尾
+    日志文件每天一个目录存放，上传同名log文件会覆盖
+    <InputFile OnChange="OnChange" class="form-control" multiple accept=".log" />
+</div>
+
+<p>Upload file: @progress%</p>
+
+<TableTemplate Items="log_files" Context="item_file">
+    <TableHeader>
+        <th>Files</th>
+        <th>Reports</th>
+    </TableHeader>
+    <RowTemplate>
+        <td>@item_file.Name</td>
+
+        <td>
+            <NavLink class="nav-link" href=@(item_file.FilePath+"/"+@item_file.ReportFile) target="_blank">
+                @item_file.ReportFile
+            </NavLink>
+        </td>
+    </RowTemplate>
+</TableTemplate>
+
+
+@code {
+    [Inject] protected Microsoft.AspNetCore.Hosting.IWebHostEnvironment? HostEnvironment { get; set; } //获取IWebHostEnvironment
+
+    const long MAX_FILE_SIZE = 4294967296;
+    private int progress = 0;
+    protected string UploadPath = "";
+    protected string? uploadstatus;
+
+    private List<LogFileInfo> log_files = new List<LogFileInfo>();
+
+    private class LogFileInfo
+    {
+        public string? Name { get; set; }
+        public string? FilePath { get; set; }
+        public string? ReportFile { get; set; }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender) return;
+        UploadPath = Path.Combine(HostEnvironment!.WebRootPath, "Upload"); //初始化上传路径
+        if (!Directory.Exists(UploadPath)) Directory.CreateDirectory(UploadPath); //不存在则新建目录
+    }
+
+    protected async Task OnChange(InputFileChangeEventArgs e)
+    {
+        int i = 0;
+        var selectedFiles = e.GetMultipleFiles(100);
+        foreach (var item in selectedFiles)
+        {
+            i++;
+            await OnSubmit(item);
+        }
+    }
+
+    protected async Task OnSubmit(IBrowserFile efile)
+    {
+        if (efile == null) return;
+        var logPath = Path.Combine(UploadPath, DateTime.Now.ToString("yyyyMMdd"));
+        if (!Directory.Exists(logPath)) Directory.CreateDirectory(logPath); //不存在则新建目录
+
+        var tempfilename = Path.Combine(logPath, efile.Name);
+        await using FileStream fs = new(tempfilename, FileMode.Create);
+        using var stream = efile.OpenReadStream(MAX_FILE_SIZE);
+        //await stream.CopyToAsync(fs);
+        int count = 0;
+        int totalCount = 0;
+        var buffer = new byte[2048];
+
+        while ((count = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+        {
+            await fs.WriteAsync(buffer, 0, buffer.Length);
+            totalCount += count;
+            progress = (int)(totalCount * 100.0 / stream.Length);
+            StateHasChanged();
+        }
+
+        stream.Close();
+        fs.Close();
+
+        ////run python scripts
+        var psi = new ProcessStartInfo("python3", $"{HostEnvironment!.WebRootPath}/analyze_hogs/analysis_hogs_log.py {tempfilename}")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                WorkingDirectory = Path.Combine(HostEnvironment!.WebRootPath, "analyze_hogs/")
+            };
+        var proc = Process.Start(psi);
+        if (proc != null)
+        {
+            proc.BeginErrorReadLine();
+            proc.BeginOutputReadLine();
+            await proc.WaitForExitAsync();
+            proc.Close();
+            var srcReportFile = Path.Combine(HostEnvironment!.WebRootPath, "analyze_hogs/reports/hogs_report.html");
+            var destReportFile = Path.Combine(logPath, Path.GetFileNameWithoutExtension(tempfilename) + "_report.html");
+
+            if (File.Exists(srcReportFile))
+            {
+                if (File.Exists(destReportFile))
+                    File.Delete(destReportFile);
+                File.Move(srcReportFile, destReportFile);
+                log_files.Add(new LogFileInfo
+                    {
+                        Name = efile.Name,
+                        FilePath = Path.GetDirectoryName(destReportFile)?.Replace(HostEnvironment!.WebRootPath, ""),
+                        ReportFile = Path.GetFileName(destReportFile)
+                    });
+            }
+            else Trace.TraceError("srcReportFile: " + srcReportFile);
+            StateHasChanged();
+        }
+    }
+}

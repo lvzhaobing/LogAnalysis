@@ -1,8 +1,16 @@
 using LogAnalysis.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.FileProviders;
+using System.Text.Encodings.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseKestrel(options =>
+{
+    options.Limits.MaxConcurrentConnections = 100;
+    options.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(600);
+});
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -19,6 +27,17 @@ if (!app.Environment.IsDevelopment())
 
 
 app.UseStaticFiles();
+
+var dir = Path.Combine(app.Environment.WebRootPath, "Upload");
+if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+var opt = new DirectoryBrowserOptions
+{
+    FileProvider = new PhysicalFileProvider(dir),
+    Formatter = new AME.HtmlDirectoryFormatterChsSorted(HtmlEncoder.Default),
+    RequestPath = new PathString("/Upload")
+};
+app.UseDirectoryBrowser(opt);
 
 app.UseRouting();
 
