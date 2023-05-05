@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\analyze_hogs\analysis_hogs_log.py" />
-    <None Include="wwwroot\analyze_hogs\templates\template.html" />
+    <None Include="wwwroot\analysis_hogs\analysis_hogs_log.py" />
+    <None Include="wwwroot\analysis_hogs\templates\template.html" />
   </ItemGroup>
 
 </Project>

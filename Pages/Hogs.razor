@@ -81,7 +81,7 @@
 
         while ((count = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
         {
-            await fs.WriteAsync(buffer, 0, buffer.Length);
+            await fs.WriteAsync(buffer, 0, count);
             totalCount += count;
             progress = (int)(totalCount * 100.0 / stream.Length);
             StateHasChanged();
@@ -91,11 +91,11 @@
         fs.Close();
 
         ////run python scripts
-        var psi = new ProcessStartInfo("python3", $"{HostEnvironment!.WebRootPath}/analyze_hogs/analysis_hogs_log.py {tempfilename}")
+        var psi = new ProcessStartInfo("python3", $"{HostEnvironment!.WebRootPath}/analysis_hogs/analysis_hogs_log.py {tempfilename}")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                WorkingDirectory = Path.Combine(HostEnvironment!.WebRootPath, "analyze_hogs/")
+                WorkingDirectory = Path.Combine(HostEnvironment!.WebRootPath, "analysis_hogs/")
             };
         var proc = Process.Start(psi);
         if (proc != null)
@@ -104,7 +104,7 @@
             proc.BeginOutputReadLine();
             await proc.WaitForExitAsync();
             proc.Close();
-            var srcReportFile = Path.Combine(HostEnvironment!.WebRootPath, "analyze_hogs/reports/hogs_report.html");
+            var srcReportFile = Path.Combine(HostEnvironment!.WebRootPath, "analysis_hogs/reports/hogs_report.html");
             var destReportFile = Path.Combine(logPath, Path.GetFileNameWithoutExtension(tempfilename) + "_report.html");
 
             if (File.Exists(srcReportFile))

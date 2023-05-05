@@ -27,6 +27,8 @@ RUN \
     xfce4 \
     xubuntu-default-settings \
     xubuntu-icon-theme && \
+  pip3 install jinja2 && \
+  pip3 install numpy && \
   echo "**** xfce tweaks ****" && \
   rm -f \
     /etc/xdg/autostart/xscreensaver.desktop && \
@@ -42,7 +44,7 @@ COPY /root /
 COPY ./.qnx /config/.qnx
 COPY ./qnxmomenticside /config/qnxmomenticside
 COPY ./publish /config/publish
-RUN chown -R 1000:0 /config
+RUN chmod +x /config/publish/LogAnalysis && chown -R 1000:0 /config
 
 # ports and volumes
 EXPOSE 3000

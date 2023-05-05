@@ -15,12 +15,6 @@
 
 <p>Upload file: @progress%</p>
 
-<div style="padding-top:30px">
-    <a class="btn btn-primary" href=@(NavigationManager.BaseUri.Replace("5000", "3000")) target="_blank">
-        <span class="oi oi-file" aria-hidden="true"></span> 标签页打开
-    </a>
-</div>
-
 
 <TableTemplate Items="log_files" Context="item_file">
     <TableHeader>
@@ -38,7 +32,12 @@
     </RowTemplate>
 </TableTemplate>
 
-<embed type="text/x-scriptlet" src=@(NavigationManager.BaseUri.Replace("5000", "3000")) width="1280" height="720">
+<div style="padding-top:30px">
+    <a class="btn btn-primary" href=@(NavigationManager.BaseUri.Replace("5000", "3000")) target="_blank">
+        <span class="oi oi-file" aria-hidden="true"></span> 标签页打开
+    </a>
+</div>
+<embed type="text/x-scriptlet" src=@(NavigationManager.BaseUri.Replace("5000", "3000")) width="1280" height="720" style="pointer-events: none;">
 
 @code {
     [Inject] protected Microsoft.AspNetCore.Hosting.IWebHostEnvironment? HostEnvironment { get; set; } //获取IWebHostEnvironment
@@ -91,7 +90,7 @@
 
         while ((count = await stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
         {
-            await fs.WriteAsync(buffer, 0, buffer.Length);
+            await fs.WriteAsync(buffer, 0, count);
             totalCount += count;
             progress = (int)(totalCount * 100.0 / stream.Length);
             StateHasChanged();
@@ -100,17 +99,12 @@
         stream.Close();
         fs.Close();
 
-        ////Copy kev file to qde workspace
-        //var destKevPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "ide-7.1-workspace/tracelog");
-        //CopyFolder(logPath, destKevPath);
-
         ////run python scripts
-        //var psi = new ProcessStartInfo("python3", $"{HostEnvironment!.WebRootPath}/analyze_hogs/analysis_hogs_log.py {tempfilename}")
-        var psi = new ProcessStartInfo("python3", "--version")
+        var psi = new ProcessStartInfo("python3", $"{HostEnvironment!.WebRootPath}/analysis_kev/analysis_kev.py {tempfilename}")
             {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                WorkingDirectory = HostEnvironment!.ContentRootPath
+                WorkingDirectory = Path.Combine(HostEnvironment!.WebRootPath, "analysis_kev/")
             };
         var proc = Process.Start(psi);
         if (proc != null)
@@ -122,7 +116,7 @@
             log_files.Add(new LogFileInfo
                 {
                     Name = efile.Name,
-                    FilePath = logPath.Replace(HostEnvironment!.WebRootPath,""),
+                    FilePath = logPath.Replace(HostEnvironment!.WebRootPath, ""),
                     ReportFile = efile.Name
                 });
             StateHasChanged();

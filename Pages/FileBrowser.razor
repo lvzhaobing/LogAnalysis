@@ -1,0 +1,9 @@
+﻿@page "/filebrowser"
+@using System.Diagnostics;
+@inject NavigationManager NavigationManager
+
+<PageTitle>浏览文件</PageTitle>
+
+<h1>浏览文件</h1>
+
+<embed id="filebrowser_embed" type="text/x-scriptlet" src=@(NavigationManager.BaseUri + "Upload") width="1280" height="720">
