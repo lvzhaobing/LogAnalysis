@@ -1,0 +1,1 @@
+docker build --no-cache --pull -t ubuntu_desktop:v1.0 .
