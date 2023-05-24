@@ -25,7 +25,7 @@
         <td>@item_file.Name</td>
 
         <td>
-            <NavLink class="nav-link" href=@(item_file.FilePath) target="_blank">
+            <NavLink class="nav-link" href=@($"{item_file.FilePath}/{item_file.ReportFile}") target="_blank">
                 @item_file.ReportFile
             </NavLink>
         </td>
@@ -73,10 +73,33 @@
         }
     }
 
+    protected async Task CreateSoftLink(string srcPath, string linkPath)
+    {
+        if (!Directory.Exists(linkPath))
+        {
+            ////create softlink
+            var softlink_psi = new ProcessStartInfo("ln", $"-s {srcPath} {linkPath}")
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    WorkingDirectory = UploadPath
+                };
+            var softlink_proc = Process.Start(softlink_psi);
+            if (softlink_proc != null)
+            {
+                await softlink_proc.WaitForExitAsync();
+                softlink_proc.Close();
+            }
+        }
+    }
+
     protected async Task OnSubmit(IBrowserFile efile)
     {
         if (efile == null) return;
-        var logPath = Path.Combine(UploadPath, DateTime.Now.ToString("yyyyMMdd"));
+        var logPath = Path.Combine(UploadPath,"tracelog");
+        await CreateSoftLink(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),"ide-7.1-workspace/tracelog"), logPath);
+
+        logPath = Path.Combine(logPath, DateTime.Now.ToString("yyyyMMddHHmmss"));
         if (!Directory.Exists(logPath)) Directory.CreateDirectory(logPath); //不存在则新建目录
 
         var tempfilename = Path.Combine(logPath, efile.Name);
@@ -117,7 +140,7 @@
                 {
                     Name = efile.Name,
                     FilePath = logPath.Replace(HostEnvironment!.WebRootPath, ""),
-                    ReportFile = efile.Name
+                    ReportFile = efile.Name.Replace("kev", "csv")
                 });
             StateHasChanged();
         }

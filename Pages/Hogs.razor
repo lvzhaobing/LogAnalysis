@@ -7,7 +7,6 @@
 
 <div>
     上传hogs log文件 要求后缀名以 .log结尾
-    日志文件每天一个目录存放，上传同名log文件会覆盖
     <InputFile OnChange="OnChange" class="form-control" multiple accept=".log" />
 </div>
 
@@ -68,7 +67,7 @@
     protected async Task OnSubmit(IBrowserFile efile)
     {
         if (efile == null) return;
-        var logPath = Path.Combine(UploadPath, DateTime.Now.ToString("yyyyMMdd"));
+        var logPath = Path.Combine(UploadPath, "hogs", DateTime.Now.ToString("yyyyMMddHHmmss"));
         if (!Directory.Exists(logPath)) Directory.CreateDirectory(logPath); //不存在则新建目录
 
         var tempfilename = Path.Combine(logPath, efile.Name);

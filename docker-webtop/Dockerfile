@@ -19,8 +19,7 @@ RUN \
   DEBIAN_FRONTEND=noninteractive \
   apt-get install --no-install-recommends -y \
     sudo \
-    net-tools \
-    autokey-qt \
+    xdotool \
     python3-pip \
     mousepad \
     xfce4-terminal \
@@ -29,6 +28,8 @@ RUN \
     xubuntu-icon-theme && \
   pip3 install jinja2 && \
   pip3 install numpy && \
+  pip3 install opencv-contrib-python && \
+  pip3 install python3-xlib && \
   echo "**** xfce tweaks ****" && \
   rm -f \
     /etc/xdg/autostart/xscreensaver.desktop && \

@@ -364,3 +364,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /docker-webtop/.qnx
 /docker-webtop/qnxmomenticside
+/wwwroot/analysis_kev/.qde_autokey.json
