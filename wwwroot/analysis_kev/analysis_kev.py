@@ -23,7 +23,7 @@ def active_window(title):
 def close_window(title):
     os.system('xdotool search --name "{}" windowclose'.format(title))
 
-def send_keys(key_code,repeat=1,delay=0.8):
+def send_keys(key_code,repeat=1,delay=1.2):
     for i in range(0,repeat):
         time.sleep(delay)
         os.system('xdotool key ' + key_code)
@@ -85,7 +85,7 @@ def qde_autokey():
     click_image('images/ClientServerTools.png',10,23)
     send_keys('Down',3)
     send_keys('Return')
-    send_keys('Tab',4)
+    send_keys('Tab',3)
     send_keys('Right')
     send_keys('End')
     send_keys('Up')
