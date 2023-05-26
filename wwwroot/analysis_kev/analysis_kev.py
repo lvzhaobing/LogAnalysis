@@ -110,6 +110,12 @@ if __name__ == '__main__':
     os.makedirs(temp_kev_dir)
     shutil.copy(input_kev_file, temp_kev_dir)
     print("temp_kev_dir: ", temp_kev_dir)
+    
+    temp_csv_dir=qde_workspace_dir + "/csv"
+    if os.path.exists(temp_csv_dir):
+        shutil.rmtree(temp_csv_dir)
+    os.makedirs(temp_csv_dir)
+
     qde_autokey()
 
     csv_temp_file=qde_workspace_dir + "/csv/output.csv"
