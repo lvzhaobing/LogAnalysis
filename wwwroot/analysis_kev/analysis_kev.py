@@ -77,7 +77,7 @@ def qde_autokey():
     send_keys('Return')
 
     # mouse click icon
-    click_image('images/ClientServerTab.png',45)
+    click_image('images/ClientServerTab.png',65)
     click_image('images/ClientServerTools.png',1,-23)
     click_image('images/ClientServerTools.png',3,23)
     send_keys('Down',2)

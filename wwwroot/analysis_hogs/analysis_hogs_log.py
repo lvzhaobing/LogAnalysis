@@ -36,6 +36,8 @@ def process_log_data():
             process_name=process_name.split('/')[-1].strip()
             if 'idle' in process_name:
                 continue
+            if process_name.isdigit():
+                continue
             try:
                 pid_str=str_array[0].strip()
                 process_id_str= process_name + '-' + pid_str
